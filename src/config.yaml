@@ -1,0 +1,53 @@
+phase: 'train'
+# phase: 'test'
+# load_yaml: True
+load_yaml: False
+epochs: 50
+gpu: '3'
+dataset_name: 'ZeroDose'
+
+contrast_list: ['T1', 'T1c', 'T2_FLAIR', 'ASL']
+# block_size: 3
+block_size: 2
+data_path: '../data/'
+batch_size: 16
+num_fold: 5
+fold: 0
+shuffle: True
+# lr: 0.0002
+lr: 0.0001
+model_name: 'Simple'
+p: 1
+# norm_type: 'z-score'
+norm_type: 'mean'
+# is_3d: True
+is_3d: False
+
+lambda_recon_y: 1.
+lambda_gan: 0.
+# target_model_name: 'Lowdose'
+# target_model_name: 'U'
+# target_model_name: 'U+SA'
+target_model_name: 'U+SSA+CA'
+# target_model_name: 'NVNet'
+
+out_num_ch: 1
+input_height: 160
+input_width: 192
+# input_height: 256
+# input_width: 256
+dropoff: False
+skull_strip: False
+
+continue_train: False
+# continue_train: True
+ckpt_name: 'model_best.pth.tar'
+# ckpt_name: 'epoch030.pth.tar'
+# ckpt_name: 'model_best_pretrained.pth.tar'  # only for pretrain
+
+# mean norm, 59 tumor
+ckpt_timelabel: '2021_9_26_22_13'             # fold 0
+# ckpt_timelabel: '2021_9_27_0_34'             # fold 1
+# ckpt_timelabel: '2021_9_27_0_35'             # fold 2
+# ckpt_timelabel: '2021_9_27_0_36'             # fold 3
+# ckpt_timelabel: '2021_9_27_0_37'             # fold 4
