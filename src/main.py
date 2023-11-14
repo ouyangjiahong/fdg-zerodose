@@ -58,7 +58,10 @@ elif config['load_yaml']:       # exist and use yaml config
 print(config['model_name'])
 # config['ckpt_name'] = 'model_best.pth.tar'
 
-Data = ZeroDoseDataAll(config['dataset_name'], config['data_path'], norm_type=config['norm_type'], batch_size=config['batch_size'], num_fold=config['num_fold'], \
+
+
+Data = ZeroDoseDataAll(config['dataset_name'], config['data_path'], config['data_h5_path'], config['train_txt_path'], config['val_txt_path'], config['test_txt_path'],
+                        postfix=config['postfix'], norm_type=config['norm_type'], batch_size=config['batch_size'], num_fold=config['num_fold'], \
                         fold=config['fold'], shuffle=config['shuffle'], num_workers=0, block_size=config['block_size'], \
                         contrast_list=config['contrast_list'], aug=False, dropoff=config['dropoff'], skull_strip=config['skull_strip'])
 trainDataLoader = Data.trainLoader
@@ -274,7 +277,7 @@ def evaluate(phase='val', set='val', save_res=True, info=''):
                     att_map_list3.append(att_map_dict['alpha_3'].detach().cpu().numpy())
 
             #
-            # if iter > 3:
+            # if iter > 10:
             #     break
 
     for key in loss_all_dict.keys():
@@ -291,7 +294,7 @@ def evaluate(phase='val', set='val', save_res=True, info=''):
         y_fake_fused_list = np.concatenate(y_fake_fused_list, axis=0)
         mask_list = np.concatenate(mask_list, axis=0)
 
-        path = os.path.join(res_path, 'results_all'+info+'.h5')
+        path = os.path.join(res_path, 'results_all'+info+config['postfix']+'.h5')
         if os.path.exists(path):
             print('Already saved h5')
         else:
@@ -309,48 +312,51 @@ def evaluate(phase='val', set='val', save_res=True, info=''):
                 h5_file.create_dataset('att_map_3', data=att_map_list3)
 
         # save nifti
-        nifti_path = os.path.join(res_path, 'nifti/')
+        nifti_path = os.path.join(res_path, 'nifti'+config['postfix']+'/')
         if not os.path.exists(nifti_path):
             os.mkdir(nifti_path)
-        norm_data = h5py.File(os.path.join('../data/tumor_complete_norm.h5'), 'r')
-        if config['norm_type'] == 'z-score':
-            data = h5py.File(os.path.join('../data/tumor_complete_zscore.h5'), 'r')
-        else:
-            data = h5py.File(os.path.join('../data/tumor_complete_mean.h5'), 'r')
-        subj_id_list_uni = subj_id_list[0::156]
-        # pdb.set_trace()
+
+        norm_data = h5py.File(config['data_norm_h5_path'], 'r')
+
+        def renormalize(volume, norm_target, norm_type):
+            if norm_type == 'z-score':
+                volume_renormed = norm_target[1] * volume + norm_target[0]
+            elif norm_type  == 'mean':
+                volume_renormed = norm_target[0] * volume
+            elif norm_type  == 'max':
+                volume_renormed = (norm_target[1]-norm_target[0]) * volume + norm_target[0]
+            else:
+                raise ValueError('Do not support this type of norm')
+            return volume_renormed
+
+        subj_id_list_uni, ind = np.unique(subj_id_list, return_index=True)
+        subj_id_list_uni = subj_id_list_uni[np.argsort(ind)]
+
         for idx, subj_id in enumerate(subj_id_list_uni):
-            s_idx = idx * 156
-            e_idx = (idx + 1) * 156
-            try:
-                if slice_idx_list[s_idx] != config['block_size'] and slice_idx_list[e_idx] != 155-config['block_size']:
-                    # pdb.set_trace()
-                    print(s_idx, e_idx)
-                norm = norm_data[subj_id+'/PET']
-                if config['norm_type'] == 'z-score':
-                    volume = norm[1] * y_fake_fused_list[s_idx: e_idx].squeeze(1) + norm[0]
-                else:
-                    volume = norm[0] * y_fake_fused_list[s_idx: e_idx].squeeze(1)
-                volume = volume[:,:157,:189]
-                save_volume_nifti(os.path.join(nifti_path, subj_id + '_pred.nii'), volume)
+            pred = y_fake_fused_list[subj_id_list==subj_id].squeeze(1)
+            target = target_list[subj_id_list==subj_id].squeeze(1)
+            inputs = input_list[subj_id_list==subj_id]
 
-                if config['norm_type'] == 'z-score':
-                    volume = norm[1] * target_list[s_idx: e_idx].squeeze(1) + norm[0]
-                else:
-                    volume = norm[0] * target_list[s_idx: e_idx].squeeze(1)
-                volume = volume[:,:157,:189]
-                save_volume_nifti(os.path.join(nifti_path, subj_id + '_PET.nii'), volume)
+            if 'PET' in norm_data[subj_id].keys():
+                norm_target = np.array(norm_data[subj_id]['PET'])
+            elif 'PET_MAC' in norm_data[subj_id].keys():
+                norm_target = np.array(norm_data[subj_id]['PET_MAC'])
+            elif 'PET_QCLEAR' in norm_data[subj_id].keys():
+                norm_target = np.array(norm_data[subj_id]['PET_QCLEAR'])
+            else:
+                norm_target = np.array(norm_data[subj_id]['PET_TOF'])
 
-                for ic, contrast in enumerate(['T1', 'T1c', 'T2_FLAIR', 'ASL']):
-                    norm = norm_data[subj_id+'/'+contrast]
-                    if config['norm_type'] == 'z-score':
-                        volume = norm[1] * np.array(data[subj_id+'/'+contrast][:157,:189]) + norm[0]
-                    else:
-                        volume = norm[0] * np.array(data[subj_id+'/'+contrast][:157,:189])
-                    volume = np.transpose(volume, (2, 0, 1))
-                    save_volume_nifti(os.path.join(nifti_path, subj_id + '_'+ contrast + '.nii'), volume)
-            except:
-                print(subj_id, s_idx, e_idx, len(slice_idx_list))
+            pred_renormed = renormalize(pred, norm_target, config['norm_type'])[:,:157,:189]
+            save_volume_nifti(os.path.join(nifti_path, subj_id + '_pred.nii'), pred_renormed)
+            target_renormed = renormalize(target, norm_target, config['norm_type'])[:,:157,:189]
+            save_volume_nifti(os.path.join(nifti_path, subj_id + '_PET.nii'), target_renormed)
+
+            for ic, contrast in enumerate(config['contrast_list']):
+                norm_contrast = np.array(norm_data[subj_id+'/'+contrast])
+                contrast_renormed = renormalize(inputs[:,ic*(2*config['block_size']+1)+config['block_size']], norm_contrast, config['norm_type'])[:,:157,:189]
+                # volume = np.transpose(volume, (2, 0, 1))
+                save_volume_nifti(os.path.join(nifti_path, subj_id + '_'+ contrast + '.nii'), contrast_renormed)
+
 
     return loss_all_dict
 

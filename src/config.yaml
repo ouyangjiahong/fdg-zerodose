@@ -1,15 +1,32 @@
-phase: 'train'
-# phase: 'test'
+# phase: 'train'
+phase: 'test'
 # load_yaml: True
 load_yaml: False
 epochs: 50
-gpu: '3'
+gpu: '0'
 dataset_name: 'ZeroDose'
+postfix: 'gre'
+# postfix: 'outside-ad'
+# postfix: 'outside-ad-complete'
+# postfix: 'stanford-ad'
+# postfix: 'stanford-ad-complete'
 
-contrast_list: ['T1', 'T1c', 'T2_FLAIR', 'ASL']
+contrast_list: ['T1_GRE', 'T1c_GRE', 'T2_FLAIR', 'ASL']
+# contrast_list: ['T1', 'T1c', 'T2_FLAIR', 'ASL']
+# contrast_list: ['T1', 'T2_FLAIR']
+# contrast_list: ['T1', 'T2_FLAIR', 'ASL']
+data_path: '../data_new/'
+data_h5_path: '../data_new/all_cases_complete_max.h5'
+data_norm_h5_path: '../data_new/all_cases_complete_max_norm.h5'
+train_txt_path: '../data_new/train_tumor_complete_4_gre_allslices.txt'
+val_txt_path: '../data_new/test_tumor_complete_4_gre_allslices.txt'
+test_txt_path: '../data_new/test_tumor_complete_4_gre_allslices.txt'
+
+norm_type: 'max'
+
 # block_size: 3
 block_size: 2
-data_path: '../data/'
+
 batch_size: 16
 num_fold: 5
 fold: 0
@@ -19,7 +36,7 @@ lr: 0.0001
 model_name: 'Simple'
 p: 1
 # norm_type: 'z-score'
-norm_type: 'mean'
+# norm_type: 'mean'
 # is_3d: True
 is_3d: False
 
@@ -45,9 +62,26 @@ ckpt_name: 'model_best.pth.tar'
 # ckpt_name: 'epoch030.pth.tar'
 # ckpt_name: 'model_best_pretrained.pth.tar'  # only for pretrain
 
+# U+SSA+CA
 # mean norm, 59 tumor
-ckpt_timelabel: '2021_9_26_22_13'             # fold 0
+# ckpt_timelabel: '2021_9_26_22_13'             # fold 0
 # ckpt_timelabel: '2021_9_27_0_34'             # fold 1
 # ckpt_timelabel: '2021_9_27_0_35'             # fold 2
 # ckpt_timelabel: '2021_9_27_0_36'             # fold 3
 # ckpt_timelabel: '2021_9_27_0_37'             # fold 4
+
+# z-score norm, 59 tumor
+# ckpt_timelabel: '2021_9_27_12_20'             # fold 0
+# ckpt_timelabel: '2021_9_27_12_22'             # fold 1
+# ckpt_timelabel: '2021_9_27_12_23'             # fold 2
+# ckpt_timelabel: '2021_9_27_12_24'             # fold 3
+# ckpt_timelabel: '2021_9_27_12_25'             # fold 4
+
+# T1, FLAIR
+# ckpt_timelabel: '2023_2_4_17_7'             # fold 0, z-score
+# ckpt_timelabel: '2023_2_5_22_42'             # fold 0, mean
+
+# ckpt_timelabel: '2023_2_4_17_13'             # fold 0, ASL, z-score
+# ckpt_timelabel: '2023_2_17_23_46'             # fold 0, ASL, mean, 667524
+
+ckpt_timelabel: '2023_11_12_23_56'            # T1(c)_GRE, 4 contrasts, tumor

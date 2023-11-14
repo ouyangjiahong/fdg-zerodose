@@ -386,7 +386,14 @@ class ZeroDoseDataset(Dataset):
             inputs = np.concatenate(imgs, 2)
 
             if self.dataset_name == 'ZeroDose':
-                targets = self.data[subj_id+'/PET'][:,:,slice_idx:slice_idx+1]
+                if subj_id+'/PET' in self.data.keys():
+                    targets = self.data[subj_id+'/PET'][:,:,slice_idx:slice_idx+1]
+                elif subj_id+'/PET_MAC' in self.data.keys():
+                    targets = self.data[subj_id+'/PET_MAC'][:,:,slice_idx:slice_idx+1]
+                elif subj_id+'/PET_QCLEAR' in self.data.keys():
+                    targets = self.data[subj_id+'/PET_QCLEAR'][:,:,slice_idx:slice_idx+1]
+                else:
+                    targets = self.data[subj_id+'/PET_TOF'][:,:,slice_idx:slice_idx+1]
             else:
                 raise ValueError('Not support other dataset yet!')
 
@@ -412,16 +419,34 @@ class ZeroDoseDataset(Dataset):
 
 
 class ZeroDoseDataAll(object):
-    def __init__(self, dataset_name, data_path, norm_type='mean', batch_size=16, num_fold=5, fold=0, shuffle=True, num_workers=0, block_size=3, contrast_list=['T1'], aug=False, dropoff=False, skull_strip=False):
+    def __init__(self, dataset_name, data_path, data_h5_path, train_txt_path, val_txt_path, test_txt_path,
+            postfix='', norm_type='mean', batch_size=16, num_fold=5, fold=0, shuffle=True, num_workers=0, block_size=3, contrast_list=['T1'], aug=False, dropoff=False, skull_strip=False):
         if dataset_name == 'ZeroDose':
-            if norm_type == 'mean':
-                data = h5py.File(os.path.join(data_path, 'tumor_complete_mean.h5'), 'r')
-            else:
-                data = h5py.File(os.path.join(data_path, 'tumor_complete_zscore.h5'), 'r')
-            subj_list_train, idx_list_train = self.load_idx_list(os.path.join(data_path, 'fold'+str(fold)+'_train_tumor_complete.txt'))
-            subj_list_val, idx_list_val = self.load_idx_list(os.path.join(data_path, 'fold'+str(fold)+'_val_tumor_complete.txt'))
-            # subj_list_test, idx_list_test = self.load_idx_list(os.path.join(data_path, 'fold'+str(fold)+'_test_4contrasts_sel_all.txt'))
-            subj_list_test, idx_list_test = self.load_idx_list(os.path.join(data_path, 'fold'+str(fold)+'_test_tumor_complete_allslices.txt'))
+
+            data = h5py.File(data_h5_path, 'r')
+            subj_list_train, idx_list_train = self.load_idx_list(train_txt_path)
+            subj_list_val, idx_list_val = self.load_idx_list(val_txt_path)
+            subj_list_test, idx_list_test = self.load_idx_list(test_txt_path)
+
+            # if norm_type == 'mean':
+            #     data = h5py.File(os.path.join(data_path, 'tumor_complete_mean.h5'), 'r')
+            # else:
+            #     data = h5py.File(os.path.join(data_path, 'tumor_complete_zscore.h5'), 'r')
+
+            # if postfix == '':
+            #     postfix = 'tumor_complete'
+            # data = h5py.File(os.path.join(data_path, postfix+'_'+norm_type+'.h5'), 'r')
+            #
+            # try:
+            #     subj_list_train, idx_list_train = self.load_idx_list(os.path.join(data_path, 'fold'+str(fold)+'_train_'+postfix+'.txt'))
+            #     subj_list_val, idx_list_val = self.load_idx_list(os.path.join(data_path, 'fold'+str(fold)+'_val_'+postfix+'.txt'))
+            #     # subj_list_test, idx_list_test = self.load_idx_list(os.path.join(data_path, 'fold'+str(fold)+'_test_4contrasts_sel_all.txt'))
+            #     subj_list_test, idx_list_test = self.load_idx_list(os.path.join(data_path, 'fold'+str(fold)+'_test_'+postfix+'_allslices.txt'))
+            # except:
+            #     # subj_list_test, idx_list_test = self.load_idx_list(os.path.join(data_path, postfix+'_complete_allslices.txt'))
+            #     subj_list_test, idx_list_test = self.load_idx_list(os.path.join(data_path, postfix+'_allslices.txt'))
+            #     subj_list_train, subj_list_val = subj_list_test, subj_list_test
+            #     idx_list_train, idx_list_val = idx_list_test, idx_list_test
         else:
             raise ValueError('Not supporting other dataset yet!')
 
@@ -484,7 +509,11 @@ class ZeroDoseDataset3D(Dataset):
             elif self.dataset_name == 'BraTS':
                 if subj_id+'/seg' in self.data.keys():
                     targets = self.data[subj_id+'/seg'][:,:,45:-46]
-                    targets[targets>0] = 1.
+                    #### if segmenting all potential tumors
+                    # targets[targets>0] = 1.
+                    #### if segmenting only Gd enhancing tumors
+                    targets[targets<4] = 0.
+                    targets[targets==4] = 1.
                 else:
                     targets = np.zeros((self.image_size[0], self.image_size[1], self.image_size[2]))
             else:
