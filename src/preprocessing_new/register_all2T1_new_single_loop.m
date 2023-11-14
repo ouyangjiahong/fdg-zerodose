@@ -14,17 +14,18 @@ matlabbatch = {matlabbatch{1}};
 path = '/data/jiahong/data/FDG_PET_preprocessed/';
 case_id_list = dir(path);
 
-contrast_list = ["T1_GRE", "T1_SE", "T1c_GRE", "T1c_SE", "T2_FLAIR", "T2_FLAIR_2D", ...
-                 "ASL", "DWI", "GRE", "PET_MAC", "PET_QCLEAR", "PET_TOF"]
+subj_list = {"2120_04122017", "8310_01072019", "30453_10012018", "30804_11012018", "Anonymized_018", ...
+            "Anonymized_020", "Anonymized_021", "Anonymized_022", "case_0110", "case_0111", "case_0125", ... 
+            "case_0129", "case_0131", "case_0174", "case_0184", "case_0198", "case_0205", "case_0219", ...
+            "Fdg_Stanford_004", "Fdg_Stanford_006", "Fdg_Stanford_016", "Fdg_Stanford_023", "Fdg_Stanford_024", ...
+            "Fdg_Stanford_025", "Fdg_Stanford_026", "Fdg_Stanford_027", "Fdg_Stanford_028", "Fdg_Stanford_029", ...
+            "Fdg_Stanford_031", "Fdg_Stanford_032"}
+contrast_name = 'ASL';
 
-for i = 1 : length(case_id_list) 
-    subj_raw = case_id_list(i);
-    if strcmp(subj_raw.name, '..') || strcmp(subj_raw.name, '.')
-        continue
-    end
-    subj = subj_raw.name;
+for subj = subj_list
+    subj = char(subj{1});
     disp(strcat('Started ', subj))
-    
+
     % do not process if no T1             
     if isfile(strcat(path, subj, '/T1_GRE.nii')) == 1
         ref_path = '/T1_GRE.nii,1';
@@ -34,57 +35,12 @@ for i = 1 : length(case_id_list)
         disp(strcat('No T1 for', subj))
         continue
     end
-    
-    % check if all coregisterations are done
-    coreg_completed = 1;
-    for contrast_name = contrast_list
-        % do not process reference image
-        contrast_name_path = char(strcat('/', contrast_name, '.nii,1'));
-        if strcmp(contrast_name_path, ref_path)
-            continue
-        end
-        
-        % if contrast does not exist
-        if isfile(strcat(path, subj, '/', contrast_name, '.nii')) == 0
-            continue
-        end
-        
-        % check if exists coregistered nii
-        if isfile(strcat(path, subj, '/r2T1_', contrast_name, '.nii')) == 0
-            coreg_completed = 0;
-            break
-        end
-    end
-    
-    % coregisterations are completed
-    if coreg_completed == 1
-        disp('coregisterations are completed')
-        continue
-    end
-    
-    % register for each contrast to reference
-    count = 0;
-    matlabbatch = {matlabbatch{1}};
-    for contrast_name = contrast_list
-        contrast_name_path = char(strcat('/', contrast_name, '.nii,1'));
-        
-        % do not process reference image
-        if strcmp(contrast_name_path, ref_path)
-            continue
-        end
-        
-        % check if this contrast exists
-        if isfile(strcat(path, subj, '/', contrast_name, '.nii')) == 1
-            disp(contrast_name);
-            disp(strcat(path, subj, ref_path))
-            disp(strcat(path, subj, contrast_name_path))
-            count = count + 1;
-            matlabbatch{count} = matlabbatch{1};
-            matlabbatch{count}.spm.spatial.coreg.estwrite.ref = {strcat(path, subj, ref_path)};
-            matlabbatch{count}.spm.spatial.coreg.estwrite.source = {strcat(path, subj, contrast_name_path)};
-            matlabbatch{count}.spm.spatial.coreg.estwrite.roptions.prefix = 'r2T1_';
-        end
-    end
+
+    contrast_name_path = char(strcat('/', contrast_name, '.nii,1'));
+    matlabbatch{1}.spm.spatial.coreg.estwrite.ref = {strcat(path, subj, ref_path)};
+    matlabbatch{1}.spm.spatial.coreg.estwrite.source = {strcat(path, subj, contrast_name_path)};
+    matlabbatch{1}.spm.spatial.coreg.estwrite.roptions.prefix = 'r2T1_';
+
     spm_jobman('run', matlabbatch)
     disp(strcat('Finished ', subj))
 end
