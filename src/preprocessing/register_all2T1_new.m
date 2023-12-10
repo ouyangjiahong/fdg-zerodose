@@ -13,12 +13,15 @@ load('register_all2T1.mat')
 %for subj_raw = {'Anonymized_018'}
 %for subj_num = 257 : 260
 %for subj_num = [258]
-for subj_raw = {'case_0134', 'case_0142'}
+% for subj_raw = {'case_0134', 'case_0142'}
 % 'case_0173', 'case_0178',
+% for subj_raw = {'2007', '2013', '236', '264', '286'}
+for subj_raw = {'286'}
     % subj = strcat('case_0',num2str(subj_num))
     subj = cell2mat(subj_raw)
     disp(subj)
-    path = '/data/jiahong/data/FDG_PET_selected/';
+    % path = '/data/jiahong/data/FDG_PET_selected/';
+    path = '/data/jiahong/data/zerodose-outside-ad-processed/';
     T1_path = '/T1.nii,1';
     T1c_path = '/T1c.nii,1';
     T2_FLAIR_path = '/T2_FLAIR.nii,1';
@@ -27,23 +30,25 @@ for subj_raw = {'case_0134', 'case_0142'}
 
 
     % register T1c to T1
-    if exist(strcat(path,subj,'/T1c.nii')) == 2
     matlabbatch{4}.spm.spatial.coreg.estwrite.ref = {strcat(path,subj,T1_path)};
     matlabbatch{4}.spm.spatial.coreg.estwrite.source = {strcat(path,subj,T1c_path)};
     matlabbatch{4}.spm.spatial.coreg.estwrite.roptions.prefix = 'r2T1_';
-    end
 
     % register T2-FLAIR to T1
-    if exist(strcat(path,subj,'/T2_FLAIR.nii')) == 2
     matlabbatch{1}.spm.spatial.coreg.estwrite.ref = {strcat(path,subj,T1_path)};
     matlabbatch{1}.spm.spatial.coreg.estwrite.source = {strcat(path,subj,T2_FLAIR_path)};
     matlabbatch{1}.spm.spatial.coreg.estwrite.roptions.prefix = 'r2T1_';
-    end
 
+    % register ASL to PET
+    matlabbatch{2}.spm.spatial.coreg.estwrite.ref = {strcat(path,subj,PET_path)};
+    matlabbatch{2}.spm.spatial.coreg.estwrite.source = {strcat(path,subj,ASL_path)};
+    matlabbatch{2}.spm.spatial.coreg.estwrite.roptions.prefix = 'r2PET_';
+
+    % register PET to T1
     matlabbatch{3}.spm.spatial.coreg.estwrite.ref = {strcat(path,subj,T1_path)};
     matlabbatch{3}.spm.spatial.coreg.estwrite.source = {strcat(path,subj,PET_path)};
+    matlabbatch{3}.spm.spatial.coreg.estwrite.other = {strcat(path,subj,'/r2PET_ASL.nii,1')};
     matlabbatch{3}.spm.spatial.coreg.estwrite.roptions.prefix = 'r2T1_';
-
 
 
     spm_jobman('run',matlabbatch)

@@ -190,7 +190,7 @@ print('Total Complete 4 GRE:', len(subj_id_list_complete_4_gre))
 print('Total Complete 6:', len(subj_id_list_complete_6))
 print('Total Complete 6 GRE:', len(subj_id_list_complete_6_gre))
 
-tumor_subj_list = subj_id_list
+# tumor_subj_list = subj_id_list
 subj_id_list_complete_tumor_2 = np.intersect1d(subj_id_list_complete_2, tumor_subj_list)
 subj_id_list_complete_tumor_2_gre = np.intersect1d(subj_id_list_complete_2_gre, tumor_subj_list)
 subj_id_list_complete_tumor_3 = np.intersect1d(subj_id_list_complete_3, tumor_subj_list)
@@ -206,20 +206,20 @@ print('Tumor T1/T1c/T2-FLAIR/ASL/DWI/GRE:', len(subj_id_list_complete_tumor_6), 
 pdb.set_trace()
 
 
-def save_data_txt(path, subj_id_list):
+def save_data_txt(path, subj_id_list, skip=1):
     count = 0
     with open(path, 'w') as ft:
         for subj_id in subj_id_list:
-            for i in range(20, 156-20):
+            for i in range(20, 156-20, skip):
                 ft.write(subj_id+' '+str(i)+'\n')
                 count += 1
     print(count)
 
-def save_data_txt_allslices(path, subj_id_list):
+def save_data_txt_allslices(path, subj_id_list, skip=1):
     count = 0
     with open(path, 'w') as ft:
         for subj_id in subj_id_list:
-            for i in range(0, 156):
+            for i in range(0, 156, skip):
                 ft.write(subj_id+' '+str(i)+'\n')
                 count += 1
     print(count)
@@ -253,10 +253,11 @@ print(len(train_subj_list), len(test_subj_list))
 
 # save_data_txt_allslices('../data_new/train_tumor_complete_4_gre_allslices.txt', train_subj_list)
 # save_data_txt('../data_new/train_tumor_complete_4_gre.txt', train_subj_list)
-# save_data_txt_allslices('../data_new/test_tumor_complete_4_gre_allslices.txt', test_subj_list)
-# save_data_txt('../data_new/test_tumor_complete_4_gre.txt', test_subj_list)
+# save_data_txt_allslices('../data_new/test_tumor_complete_4_gre_allslices_skip2.txt', test_subj_list, skip=2)
+# save_data_txt('../data_new/test_tumor_complete_4_gre_skip2.txt', test_subj_list, skip=2)
 
-save_data_txt_allslices('../data_new/test_tumor_complete_4_both_se_gre_allslices.txt', test_subj_list)
+save_data_txt_allslices('../data_new/test_tumor_complete_4_both_se_gre_allslices_skip2.txt', test_subj_list, skip=2)
+save_data_txt('../data_new/test_tumor_complete_4_both_se_gre_skip2.txt', test_subj_list, skip=2)
 
 # save_data_txt_allslices('../data_new/train_all_complete_2_gre_allslices.txt', train_subj_list)
 # save_data_txt('../data_new/train_all_complete_2_gre.txt', train_subj_list)

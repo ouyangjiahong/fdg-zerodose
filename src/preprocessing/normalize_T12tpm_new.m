@@ -26,20 +26,23 @@ load('normalize_T12tpm.mat')
     % '1498_05312016', '1512_06062016','2114_04102017'
 % for subj_raw = {'1498_05312016', '1512_06062016'}
 %for subj_raw = {'case_0122', 'case_0124', 'case_0150', 'case_0180', 'case_0235', 'case_0246', 'case_0249', 'case_0250', 'case_0253'}
-for subj_raw = {'case_0248'}
+for subj_raw = {'264', '286'}
     % subj = strcat('case_0',num2str(subj_num))
     subj = cell2mat(subj_raw)
     % subj = char(subj);
-    path = '/data/jiahong/data/FDG_PET_selected_new/';
+    % path = '/data/jiahong/data/FDG_PET_selected_new/';
+    path = '/data/jiahong/data/zerodose-outside-ad-processed/';
 
     matlabbatch{1}.spm.spatial.normalise.estwrite.eoptions.tpm = {'/data/jiahong/data/TPM.nii'};
-    matlabbatch{1}.spm.spatial.normalise.estwrite.subj.vol = {strcat(path,subj,'/T1c.nii,1')};
+    matlabbatch{1}.spm.spatial.normalise.estwrite.subj.vol = {strcat(path,subj,'/T1.nii,1')};
     matlabbatch{1}.spm.spatial.normalise.estwrite.subj.resample = {
-                                                                  strcat(path,subj,'/T1c.nii,1')
-                                                                
+                                                              strcat(path,subj,'/r2T1_PET.nii,1')
+                                                              strcat(path,subj,'/r2T1_T2_FLAIR.nii,1')
+                                                              strcat(path,subj,'/r2T1_r2PET_ASL.nii,1')
+                                                              strcat(path,subj,'/T1.nii,1')
+
 
                                                                    };
-                                                                   % strcat(path,subj,'/r2T1_T1c.nii,1'),strcat(path,subj,'/r2T1_r2PET_ASL.nii,1')
 
 
 

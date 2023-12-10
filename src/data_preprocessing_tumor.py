@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 import pdb
 
 z_score_norm = False
+max_score_norm = True
 
-data_path = '/data/jiahong/data/FDG_PET_selected_checked/'
+# data_path = '/data/jiahong/data/FDG_PET_selected_checked/'
+data_path = '/data/jiahong/data/FDG_PET_selected_all/'
 subj_paths = glob.glob(data_path+'*')
 
 # tumor_subj_list = ['case_0103', 'case_0110', 'case_0111', 'case_0117', 'case_0118', 'case_0124',
@@ -63,30 +65,54 @@ ASL_list = []
 subj_id_list = []
 subj_id_list_complete = []
 subj_all_dict = {}
-for subj_path in subj_paths:
-    subj_id = os.path.basename(subj_path)
+for subj_id in tumor_subj_list:
+    subj_path = os.path.join(data_path, subj_id)
     if len(os.listdir(subj_path)) == 0:
         continue
     subj_id_list.append(subj_id)
     subj_dict = {}
-    if os.path.exists(os.path.join(subj_path, 'tpm_r2T1_PET.nii')):
-        subj_dict['PET'] = os.path.join(subj_path, 'tpm_r2T1_PET.nii')
+    if os.path.exists(os.path.join(subj_path, 'r2T1_PET.nii')):
+        subj_dict['PET'] = os.path.join(subj_path, 'r2T1_PET.nii')
         PET_list.append(subj_path)
-    if os.path.exists(os.path.join(subj_path, 'tpm_T1.nii')):
-        subj_dict['T1'] = os.path.join(subj_path, 'tpm_T1.nii')
+    if os.path.exists(os.path.join(subj_path, 'T1.nii')):
+        subj_dict['T1'] = os.path.join(subj_path, 'T1.nii')
         T1_list.append(subj_path)
-    if os.path.exists(os.path.join(subj_path, 'tpm_r2T1_T1c.nii')):
-        subj_dict['T1c'] = os.path.join(subj_path, 'tpm_r2T1_T1c.nii')
+    if os.path.exists(os.path.join(subj_path, 'r2T1_T1c.nii')):
+        subj_dict['T1c'] = os.path.join(subj_path, 'r2T1_T1c.nii')
         T1c_list.append(subj_path)
-    if os.path.exists(os.path.join(subj_path, 'tpm_r2T1_T2_FLAIR.nii')):
-        subj_dict['T2_FLAIR'] = os.path.join(subj_path, 'tpm_r2T1_T2_FLAIR.nii')
+    if os.path.exists(os.path.join(subj_path, 'r2T1_T2_FLAIR.nii')):
+        subj_dict['T2_FLAIR'] = os.path.join(subj_path, 'r2T1_T2_FLAIR.nii')
         T2_FLAIR_list.append(subj_path)
-    if os.path.exists(os.path.join(subj_path, 'tpm_r2T1_r2PET_ASL.nii')):
-        subj_dict['ASL'] = os.path.join(subj_path, 'tpm_r2T1_r2PET_ASL.nii')
+    if os.path.exists(os.path.join(subj_path, 'r2T1_r2PET_ASL.nii')):
+        subj_dict['ASL'] = os.path.join(subj_path, 'r2T1_r2PET_ASL.nii')
         ASL_list.append(subj_path)
     subj_all_dict[subj_id] = subj_dict
     if len(subj_dict) == 5:
         subj_id_list_complete.append(subj_id)
+# for subj_path in subj_paths:
+    # subj_id = os.path.basename(subj_path)
+    # if len(os.listdir(subj_path)) == 0:
+    #     continue
+    # subj_id_list.append(subj_id)
+    # subj_dict = {}
+    # if os.path.exists(os.path.join(subj_path, 'tpm_r2T1_PET.nii')):
+    #     subj_dict['PET'] = os.path.join(subj_path, 'tpm_r2T1_PET.nii')
+    #     PET_list.append(subj_path)
+    # if os.path.exists(os.path.join(subj_path, 'tpm_T1.nii')):
+    #     subj_dict['T1'] = os.path.join(subj_path, 'tpm_T1.nii')
+    #     T1_list.append(subj_path)
+    # if os.path.exists(os.path.join(subj_path, 'tpm_r2T1_T1c.nii')):
+    #     subj_dict['T1c'] = os.path.join(subj_path, 'tpm_r2T1_T1c.nii')
+    #     T1c_list.append(subj_path)
+    # if os.path.exists(os.path.join(subj_path, 'tpm_r2T1_T2_FLAIR.nii')):
+    #     subj_dict['T2_FLAIR'] = os.path.join(subj_path, 'tpm_r2T1_T2_FLAIR.nii')
+    #     T2_FLAIR_list.append(subj_path)
+    # if os.path.exists(os.path.join(subj_path, 'tpm_r2T1_r2PET_ASL.nii')):
+    #     subj_dict['ASL'] = os.path.join(subj_path, 'tpm_r2T1_r2PET_ASL.nii')
+    #     ASL_list.append(subj_path)
+    # subj_all_dict[subj_id] = subj_dict
+    # if len(subj_dict) == 5:
+    #     subj_id_list_complete.append(subj_id)
 
 print('Total:', len(subj_id_list))
 print('Total Complete:', len(subj_id_list_complete))
@@ -104,44 +130,57 @@ brain_mask = brain_mask_nib.get_fdata()
 
 # if z_score_norm == True:
 #     h5_path = '/data/jiahong/fdg-zerodose/data/tumor_complete_zscore.h5'
+# elif max_score_norm == True:
+#     h5_path = '/data/jiahong/fdg-zerodose/data/tumor_complete_max.h5'
 # else:
 #     h5_path = '/data/jiahong/fdg-zerodose/data/tumor_complete_mean.h5'
+if z_score_norm == True:
+    h5_path = '/data/jiahong/fdg-zerodose/data/tumor_complete_zscore_nottemplate.h5'
+elif max_score_norm == True:
+    h5_path = '/data/jiahong/fdg-zerodose/data/tumor_complete_max_nottemplate.h5'
+else:
+    h5_path = '/data/jiahong/fdg-zerodose/data/tumor_complete_mean_nottemplate.h5'
 # h5_path_norm = '/data/jiahong/fdg-zerodose/data/tumor_complete_norm.h5'
-#
-# f  = h5py.File(h5_path, 'a')
+
+f  = h5py.File(h5_path, 'a')
 # f_norm  = h5py.File(h5_path_norm, 'a')
-#
-# subj_data_dict = {}
-# subj_id_list_save = []
-# for i, subj_id in enumerate(subj_id_list_complete_tumor):
-#     subj_data = f.create_group(subj_id)
-#     subj_dict = subj_all_dict[subj_id]
-#     subj_data_norm = f_norm.create_group(subj_id)
-#     for contrast_name in subj_dict.keys():
-#         img_nib = nib.load(subj_dict[contrast_name])
-#         img = img_nib.get_fdata()
-#         if img.shape != (157, 189, 156) or np.nanmax(img) == 0 or np.isnan(img[:,:,20:-20]).sum()>100000:
-#             print(subj_id)
-#             print(img.shape, np.nanmax(img), np.isnan(img[:,:,20:-20]).sum())
-#             break
-#         img = np.nan_to_num(img, nan=0.)
-#         img = img * brain_mask
-#         img[img<0] = 0
-#         img = np.concatenate([img, np.zeros((3,189,156))], 0)     # (157,189) -> (160,192)
-#         img = np.concatenate([img, np.zeros((160,3,156))], 1)
-#
-#         norm = img.mean()
-#         # img = img / norm  # norm by dividing mean
-#         std = img.std()
-#         if z_score_norm == True:
-#             img = (img - norm) / (std + 1e-8)
-#         else:
-#             img  = img / norm
-#
-#         subj_data.create_dataset(contrast_name, data=img)
-#         subj_data_norm.create_dataset(contrast_name, data=[norm, std])
-#     subj_id_list_save.append(subj_id)
-#     print(i, subj_id)
+
+subj_data_dict = {}
+subj_id_list_save = []
+for i, subj_id in enumerate(subj_id_list_complete_tumor):
+    subj_data = f.create_group(subj_id)
+    subj_dict = subj_all_dict[subj_id]
+    # subj_data_norm = f_norm.create_group(subj_id)
+    for contrast_name in subj_dict.keys():
+        img_nib = nib.load(subj_dict[contrast_name])
+        img = img_nib.get_fdata()
+        if img.shape != (157, 189, 156) or np.nanmax(img) == 0 or np.isnan(img[:,:,20:-20]).sum()>100000:
+            print(subj_id)
+            print(img.shape, np.nanmax(img), np.isnan(img[:,:,20:-20]).sum())
+            break
+        img = np.nan_to_num(img, nan=0.)
+        img = img * brain_mask
+        img[img<0] = 0
+        img = np.concatenate([img, np.zeros((3,189,156))], 0)     # (157,189) -> (160,192)
+        img = np.concatenate([img, np.zeros((160,3,156))], 1)
+
+        norm = img.mean()
+        # img = img / norm  # norm by dividing mean
+        std = img.std()
+        if z_score_norm == True:
+            img = (img - norm) / (std + 1e-8)
+        elif max_score_norm == True:
+            img_max = np.percentile(img, 98)
+            img_min = np.percentile(img, 2)
+            img = (img - img_min) / (img_max - img_min)
+            img = np.clip(img, a_max=1., a_min=0.)
+        else:
+            img  = img / norm
+
+        subj_data.create_dataset(contrast_name, data=img)
+        # subj_data_norm.create_dataset(contrast_name, data=[norm, std])
+    subj_id_list_save.append(subj_id)
+    print(i, subj_id)
 
 
 def save_data_txt(path, subj_id_list):
@@ -192,11 +231,18 @@ for fold in range(5):
     subj_id_list_val = subj_id_list_train_val[:int(0.1*len(subj_id_list_train_val))]
     subj_id_list_train = subj_id_list_train_val[int(0.1*len(subj_id_list_train_val)):]
 
-    save_data_txt('../data/fold'+str(fold)+'_train_tumor_complete.txt', subj_id_list_train)
-    save_data_txt('../data/fold'+str(fold)+'_val_tumor_complete.txt', subj_id_list_val)
-    save_data_txt('../data/fold'+str(fold)+'_test_tumor_complete.txt', subj_id_list_test)
+    pdb.set_trace()
+    save_data_txt('../data/fold'+str(fold)+'_train_tumor_complete_nottemplate.txt', subj_id_list_train)
+    save_data_txt('../data/fold'+str(fold)+'_val_tumor_complete_nottemplate.txt', subj_id_list_val)
+    save_data_txt('../data/fold'+str(fold)+'_test_tumor_complete_nottemplate.txt', subj_id_list_test)
 
-    save_data_txt_allslices('../data/fold'+str(fold)+'_test_tumor_complete_allslices.txt', subj_id_list_test)
-    save_data_txt_3d('../data/fold'+str(fold)+'_test_tumor_complete_3d.txt', subj_id_list_test)
+    save_data_txt_allslices('../data/fold'+str(fold)+'_test_tumor_complete_allslices_nottemplate.txt', subj_id_list_test)
 
-save_data_txt_3d('../data/tumor_complete_3d_all.txt', subj_id_list_sel)
+    # save_data_txt('../data/fold'+str(fold)+'_train_tumor_complete.txt', subj_id_list_train)
+    # save_data_txt('../data/fold'+str(fold)+'_val_tumor_complete.txt', subj_id_list_val)
+    # save_data_txt('../data/fold'+str(fold)+'_test_tumor_complete.txt', subj_id_list_test)
+    #
+    # save_data_txt_allslices('../data/fold'+str(fold)+'_test_tumor_complete_allslices.txt', subj_id_list_test)
+    # save_data_txt_3d('../data/fold'+str(fold)+'_test_tumor_complete_3d.txt', subj_id_list_test)
+
+# save_data_txt_3d('../data/tumor_complete_3d_all.txt', subj_id_list_sel)

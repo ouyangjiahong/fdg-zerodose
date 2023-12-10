@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import pdb
 
 z_score_norm = False
-max_score_norm = True
+max_score_norm = False
+suvr_score_norm = True
 
 # data_path = '/data/jiahong/data/FDG_PET_selected_checked/'
 # data_path = '/data/jiahong/data/FDG_PET_selected_all/'
@@ -145,6 +146,9 @@ if z_score_norm == True:
 elif max_score_norm == True:
     h5_path = '/data/jiahong/fdg-zerodose/data_new/all_cases_complete_max.h5'
     h5_path_norm = '/data/jiahong/fdg-zerodose/data_new/all_cases_complete_max_norm.h5'
+elif suvr_score_norm == True:
+    h5_path = '/data/jiahong/fdg-zerodose/data_new/all_cases_complete_suvr.h5'
+    h5_path_norm = '/data/jiahong/fdg-zerodose/data_new/all_cases_complete_suvr_norm.h5'
 else:
     h5_path = '/data/jiahong/fdg-zerodose/data_new/all_cases_complete_mean.h5'
     h5_path_norm = '/data/jiahong/fdg-zerodose/data_new/all_cases_complete_mean_std_norm.h5'
@@ -156,6 +160,10 @@ else:
 # else:
 #     h5_path = '/data/jiahong/fdg-zerodose/data/tumor_complete_mean_nottemplate.h5'
 
+label_mask = nib.load('postprocessing/evaluation/labels_whole_brain.nii').get_fdata()
+label = np.unique(label_mask)
+# label_white_mask = np.logical_or(np.logical_or(label_mask==2, label_mask==41), np.logical_or(label_mask==3, label_mask==42))
+label_white_mask = np.logical_or(label_mask == 2, label_mask == 41)
 
 f  = h5py.File(h5_path, 'a')
 f_norm  = h5py.File(h5_path_norm, 'a')
@@ -163,6 +171,7 @@ f_norm  = h5py.File(h5_path_norm, 'a')
 subj_data_dict = {}
 subj_id_list_save = []
 subj_id_list = sorted(subj_id_list)
+max_list = []
 for i, subj_id in enumerate(subj_id_list):
     # if subj_id not in ['Fdg_Stanford_002', 'Fdg_Stanford_016', 'case_0137', 'case_0219']:
     #     continue
@@ -172,6 +181,8 @@ for i, subj_id in enumerate(subj_id_list):
     subj_dict = subj_all_dict[subj_id]
     subj_data_norm = f_norm.create_group(subj_id)
     for contrast_name in subj_dict.keys():
+        # if 'PET' not in contrast_name:
+        #     continue
         img_nib = nib.load(subj_dict[contrast_name])
         img = img_nib.get_fdata()
         if img.shape != (157, 189, 156) or np.nanmax(img) == 0 or np.isnan(img[:,:,20:-20]).sum()>100000:
@@ -194,14 +205,33 @@ for i, subj_id in enumerate(subj_id_list):
             img_min = np.percentile(img, 2)
             img = (img - img_min) / (img_max - img_min)
             img = np.clip(img, a_max=1., a_min=0.)
+        elif suvr_score_norm == True:
+            if 'PET' in contrast_name:
+                white_matter_mean = np.sum(label_white_mask * img[:-3,:-3]) / np.sum(label_white_mask)
+                img = img / (5. * white_matter_mean)    # max val is 5.05, most < 4.3
+                max_list.append(img.max())
+                # print(max_list[-1])
+            else:
+                img_max = np.percentile(img, 99.9)
+                img_min = np.percentile(img, 0.1)
+                img = (img - img_min) / (img_max - img_min)
+                img = np.clip(img, a_max=1., a_min=0.)
         else:
             img  = img / norm
 
         subj_data.create_dataset(contrast_name, data=img)
         if max_score_norm == True:
             subj_data_norm.create_dataset(contrast_name, data=[img_min, img_max])
+        elif suvr_score_norm == True:
+            if 'PET' in contrast_name:
+                subj_data_norm.create_dataset(contrast_name, data=[white_matter_mean])
+            else:
+                subj_data_norm.create_dataset(contrast_name, data=[img_min, img_max])
         else:
             subj_data_norm.create_dataset(contrast_name, data=[norm, std])
 
     subj_id_list_save.append(subj_id)
     print(i, subj_id)
+
+# pdb.set_trace()
+# print(np.max(max_list))

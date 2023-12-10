@@ -25,11 +25,13 @@ load('register_all2T1.mat')
 %for subj_raw = {'Anonymized_018','Anonymized_019','Anonymized_020','Anonymized_021','Anonymized_022'}
 %for subj_raw = {'Anonymized_018'}
 %for subj_num = 257 : 260
-for subj_num = [240, 241, 242, 248, 251, 252, 257, 258]
-    subj = strcat('case_0',num2str(subj_num))
-    % subj = cell2mat(subj_raw)
+%for subj_num = [240, 241, 242, 248, 251, 252, 257, 258]
+for subj_raw = {'286'}
+    % subj = strcat('case_0',num2str(subj_num))
+    subj = cell2mat(subj_raw)
     disp(subj)
-    path = '/data/jiahong/data/FDG_PET_selected_new/';
+    % path = '/data/jiahong/data/FDG_PET_selected_new/';
+    path = '/data/jiahong/data/Jiahong_Zaharchuk_Data/';
     T1_path = '/T1.nii,1';
     T1c_path = '/T1c.nii,1';
     T2_FLAIR_path = '/T2_FLAIR.nii,1';
