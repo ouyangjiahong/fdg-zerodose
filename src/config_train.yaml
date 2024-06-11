@@ -1,0 +1,173 @@
+# phase: 'train'
+# # phase: 'test'
+# # load_yaml: True
+# load_yaml: False
+# epochs: 50
+# gpu: '1'
+# dataset_name: 'ZeroDose'
+# # dataset_name: 'ZeroDose_rawspace'
+# postfix: 'gre' #'gre'
+# # postfix: 'outside-ad'
+# # postfix: 'outside-ad-complete'
+# # postfix: 'stanford-ad'
+# # postfix: 'stanford-ad-complete'
+
+# # contrast_list: ['T1_GRE', 'T1c_GRE', 'T2_FLAIR', 'ASL']
+# # contrast_list: ['T1_GRE', 'T1c_SE', 'T2_FLAIR', 'ASL']
+# # contrast_list: ['T1_SE', 'T1c_SE', 'T2_FLAIR', 'ASL']
+# # contrast_list: ['T1_SE', 'T1c_GRE', 'T2_FLAIR', 'ASL']
+# contrast_list: ['T1', 'T1c', 'T2_FLAIR', 'ASL']
+# # contrast_list: ['T1', 'T2_FLAIR']
+# # contrast_list: ['T1', 'T2_FLAIR', 'ASL']
+# data_path: '../data_new/'
+# # norm_type: 'max'
+# # data_h5_path: '../data_new/all_cases_complete_max.h5'
+# # data_norm_h5_path: '../data_new/all_cases_complete_max_norm.h5'
+# norm_type: 'mean'
+# data_h5_path: '../data_new/all_cases_complete_mean.h5'
+# data_norm_h5_path: '../data_new/all_cases_complete_mean_std_norm.h5'
+
+# train_txt_path: '../data_new/train_tumor_complete_4_gre.txt'
+# val_txt_path: '../data_new/test_tumor_complete_4_gre.txt'
+# test_txt_path: '../data_new/test_tumor_complete_4_gre.txt'
+# # train_txt_path: '../data_new/train_tumor_complete_4_gre_allslices.txt'
+# # val_txt_path: '../data_new/test_tumor_complete_4_gre_allslices.txt'
+# # test_txt_path: '../data_new/test_tumor_complete_4_gre_allslices.txt'
+# # test_txt_path: '../data_new/test_tumor_complete_4_both_se_gre_allslices.txt'  #'../data_new/test_tumor_complete_4_gre_allslices.txt'
+
+# # data_h5_path: '../data_new/all_cases_rawspace_complete_max.h5'
+# # data_norm_h5_path: '../data_new/all_cases_rawspace_complete_max_norm.h5'
+# # train_txt_path: '../data_new/fold0_train_tumor_complete_rawspace.txt'
+# # # train_txt_path: '../data_new/fold0_train_tumor_nontumor_complete_rawspace.txt'
+# # val_txt_path: '../data_new/fold0_val_tumor_complete_rawspace.txt'
+# # test_txt_path: '../data_new/fold0_test_tumor_complete_rawspace_allslices.txt'  #'../data_new/test_tumor_complete_4_gre_allslices.txt'
+
+# # block_size: 3
+# block_size: 1
+
+# batch_size: 16
+# num_fold: 5
+# fold: 0
+# shuffle: True
+# lr: 0.0002
+# # lr: 0.0001
+# model_name: 'Simple'
+# p: 1
+# # is_3d: True
+# is_3d: False
+
+# lambda_recon_y: 1.
+# lambda_gan: 0.
+# # target_model_name: 'Lowdose'
+# # target_model_name: 'U'
+# # target_model_name: 'U+SA'
+# # target_model_name: 'U+SA+CA'
+# target_model_name: 'U+SSA+CA'
+# # target_model_name: 'NVNet'
+# is_transformer: True
+
+# out_num_ch: 1
+# input_height: 160
+# input_width: 192
+# # input_height: 256
+# # input_width: 256
+# dropoff: False
+# skull_strip: False
+
+# continue_train: False
+# # continue_train: True
+# ckpt_name: 'model_best.pth.tar'
+# # ckpt_name: 'epoch030.pth.tar'
+# # ckpt_name: 'model_best_pretrained.pth.tar'  # only for pretrain
+
+# # U+SSA+CA
+# # mean norm, 59 tumor
+# # ckpt_timelabel: '2021_9_26_22_13'             # fold 0
+# # ckpt_timelabel: '2021_9_27_0_34'             # fold 1
+# # ckpt_timelabel: '2021_9_27_0_35'             # fold 2
+# # ckpt_timelabel: '2021_9_27_0_36'             # fold 3
+# # ckpt_timelabel: '2021_9_27_0_37'             # fold 4
+
+# # z-score norm, 59 tumor
+# # ckpt_timelabel: '2021_9_27_12_20'             # fold 0
+# # ckpt_timelabel: '2021_9_27_12_22'             # fold 1
+# # ckpt_timelabel: '2021_9_27_12_23'             # fold 2
+# # ckpt_timelabel: '2021_9_27_12_24'             # fold 3
+# # ckpt_timelabel: '2021_9_27_12_25'             # fold 4
+
+# # T1, FLAIR
+# # ckpt_timelabel: '2023_2_4_17_7'             # fold 0, z-score
+# # ckpt_timelabel: '2023_2_5_22_42'             # fold 0, mean
+
+# # ckpt_timelabel: '2023_2_4_17_13'             # fold 0, ASL, z-score
+# # ckpt_timelabel: '2023_2_17_23_46'             # fold 0, ASL, mean, 667524
+
+# # ckpt_timelabel: '2023_11_12_23_56'            # T1(c)_GRE, 4 contrasts, tumor, softplus
+# # ckpt_timelabel: '2023_11_13_18_2'            # T1(c)_GRE, 4 contrasts, tumor, no output act, clip, 2638299
+# # ckpt_timelabel: '2023_11_13_18_7'           # T1(c) GRE or SE random, 4 contrasts, tumor, no output act, clip, 1849854
+
+# # raw space
+# # ckpt_timelabel: '2024_1_14_20_18'            # fold 0, rawspace, 4 contrasts T1(c) GRE or SE random, tumor, max norm, no output act, clip, 1849854
+# # ckpt_timelabel: '2024_1_14_20_17'            # fold 0, rawspace, 4 contrasts T1(c) GRE or SE random, tumor+nontumor, max norm, no output act, clip, 2528820
+
+# # transformer
+# ckpt_timelabel: '2024_2_26_13_18'       # mean norm, tumor
+
+
+
+# -----------------------------------
+# Use for inference.py to predict PET directly from MRIs in nifti
+# Note, the data should be organized as:
+# The contrast name should be the same as the contrast_list: ['T1', 'T1c', 'T2_FLAIR', 'ASL']
+# test_dir
+#     - case1
+#         - T1.nii
+#         - T1c.nii
+#         - T2_FLAIR.nii
+#         - ASL.nii
+#         - PET.nii (optional)
+#     - case2
+#         - T1.nii
+#         - T1c.nii
+#         - T2_FLAIR.nii
+#         - ASL.nii
+#     ...
+# each MRI should be first register to T1 and then transformed to the template space leading to size of 157,189,156
+#  -----------------------------------
+
+gpu: '1'
+load_yaml: False
+continue_train: False
+ckpt_name: None     # model_best.pth.tar
+
+dataset_name: 'ZeroDose_rawspace'
+data_path: '../data_new/'
+contrast_list: ['T1', 'T1c', 'T2_FLAIR', 'ASL']
+norm_type: 'mean'
+data_h5_path: '../data_new/all_cases_rawspace_complete_mean.h5'
+data_norm_h5_path: '../data_new/all_cases_rawspace_complete_mean_std_norm.h5'
+train_txt_path: '../data_new/all_tumor_complete_rawspace.txt'
+val_txt_path: '../data_new/all_nontumor_complete_rawspace.txt'
+test_txt_path: '../data_new/all_nontumor_complete_rawspace.txt'
+brain_mask_path: '/data/jiahong/fdg-zerodose/data/tpm_mask_new.nii'
+aug: False
+shuffle: True
+dropoff: False
+target_contrast: 'PET'
+
+block_size: 1
+input_height: 256
+input_width: 256
+lr: 0.0002
+epochs: 50
+batch_size: 16
+p: 1
+lambda_recon_y: 1.
+lambda_gan: 0.01
+out_num_ch: 1
+is_transformer: True
+is_symmetry: False
+is_gan: True
+
+# ckpt_timelabel: None
+ckpt_path: '../ckpt/4contrast_tumor_rawspace'
